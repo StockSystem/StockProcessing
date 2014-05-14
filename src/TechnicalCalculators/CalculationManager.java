@@ -6,7 +6,6 @@ package TechnicalCalculators;
 
 import DataLoaders.SQLDBTools;
 import DataContainers.StockData;
-import DataLoaders.YahooQuoteSource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,7 +21,7 @@ public class CalculationManager {
     private StockData stockData;
     private HashMap<String,CalculationResult> resultList;
     private int cacheSize=20;
-    private SQLDBTools dbConnection;
+    private final SQLDBTools dbConnection;
     
     public CalculationManager() {
         super();

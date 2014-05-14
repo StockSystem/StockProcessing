@@ -52,15 +52,6 @@ public class YahooQuoteSource {
         stockData = new StockData(stock);
         // parameters
 
-        /*
-         String beginYear = String.valueOf(Integer.parseInt(startDate.substring(0,4)));
-         String beginMonth = String.valueOf(Integer.parseInt(startDate.substring(5,7)));
-         String beginDay = String.valueOf(Integer.parseInt(startDate.substring(8)));
-        
-         String year = String.valueOf(Integer.parseInt(endDate.substring(0,4)));
-         String month = String.valueOf(Integer.parseInt(endDate.substring(5,7)));
-         String day = String.valueOf(Integer.parseInt(endDate.substring(8)));
-         */
         String beginYear = String.valueOf(Integer.parseInt(startDate.substring(0, 4)));
         String beginMonth = String.valueOf(Integer.parseInt(startDate.substring(5, 7)) - 1);
         String beginDay = String.valueOf(Integer.parseInt(startDate.substring(8)));
@@ -102,7 +93,7 @@ public class YahooQuoteSource {
             }
         } catch (IOException iOException) {
             Logger.getLogger(DynamoDBTools.class.getName()).log(
-                    Level.INFO, "Data retrieval error from Yahoo.  Probably requested dates outside of their range. ", iOException);
+                    Level.INFO, "Data retrieval error from Yahoo.  Probably requested dates outside of their range.");
         } catch (NumberFormatException numberFormatException) {
         }
         

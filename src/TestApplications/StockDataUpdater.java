@@ -7,7 +7,15 @@
 package TestApplications;
 
 import DataLoaders.DynamoDBTools;
+import DataLoaders.YahooQuoteSource;
+import TechnicalCalculators.CalculationManager;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -34,14 +42,48 @@ public class StockDataUpdater {
         return stocklist;
     }
     
+  private String dateAdjuster(String currentDate, int adjustment) {
+        try {
+           SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+           Date adjustedDate = df.parse(currentDate);
+           Calendar c = Calendar.getInstance();
+           c.setTime(adjustedDate);
+           c.add(Calendar.DATE, adjustment);
+           
+           return df.format(c.getTime());
+           
+            
+        } catch (ParseException ex) {
+            Logger.getLogger(CalculationManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+       return null;
+    }
+    
     public void run(ArrayList<String> stocklist) {
         //load list of stocks to run
-        
-       for (String stock : stocklist) {
-            dbConnection.dailyStockUpdatetoDB(stock);
+
+        for (String stock : stocklist) {
+            //get last date from database
+            String date = dbConnection.getMostRecentEntryDate(stock);
+            if (date == null) {
+                Logger.getLogger(StockDataUpdater.class.getName())
+                        .log(Level.INFO, "Full Load of: " + stock);
+                dbConnection.loadStocktoDB(stock);
+            } else {
+                try {
+                    Logger.getLogger(StockDataUpdater.class.getName())
+                            .log(Level.INFO, "Updating " + stock + " since: " + date);
+                    dbConnection.loadStocktoDB(
+                            YahooQuoteSource.fetchEOD(stock,
+                                    dateAdjuster(date, 1), //Add a day to the last entry
+                                    new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
+                } catch (Exception ex) {
+                    Logger.getLogger(StockDataUpdater.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        
-        
+
     }
     
     public static  void main(String[] args) {

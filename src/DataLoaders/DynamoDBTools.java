@@ -155,6 +155,9 @@ public class DynamoDBTools {
     
     public void loadStocktoDB(StockData data) {
         
+        if (data.getCandles().size() <1  || data==null) 
+            { return;}
+        
         DynamoDBMapper mapper = new DynamoDBMapper(client);
         
         try {
@@ -166,6 +169,32 @@ public class DynamoDBTools {
         }
     }
     
+    public String getMostRecentEntryDate(String stockname) {
+        DynamoDBMapper mapper = new DynamoDBMapper(client);
+        
+        try {
+            Quote replyKey = new Quote();
+            replyKey.setStockname(stockname);
+
+            DynamoDBQueryExpression<Quote> queryExpression = new DynamoDBQueryExpression<Quote>()
+                    .withHashKeyValues(replyKey)
+                    .withScanIndexForward(false)
+                    .withLimit(1);
+
+            //List<Quote> fullList = mapper.query(Quote.class, queryExpression);
+            List<Quote> fullList = mapper.queryPage(Quote.class, queryExpression).getResults();
+
+            if (fullList.size() >0) {
+                return fullList.get(0).getDate();
+            } 
+            return null;  
+            
+        } catch (AmazonServiceException ase) {
+            Logger.getLogger(DynamoDBTools.class.getName()).log(Level.SEVERE, "Failed to fetch item in " + stockname, ase);
+            return null;
+        }
+    }
+        
     public void readStockfromDB(String stockname) {
 
         DynamoDBMapper mapper = new DynamoDBMapper(client);
@@ -227,5 +256,7 @@ public class DynamoDBTools {
         me.dailyStockUpdatetoDB("shld");
         me.readStockfromDB("shld");
     }
+
+
 
 }
