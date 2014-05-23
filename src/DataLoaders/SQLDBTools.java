@@ -13,6 +13,7 @@ import DataContainers.StockData;
 import DataContainers.Quote;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -220,7 +221,7 @@ public class SQLDBTools {
             ----- I Should have written this to pull the oldest date (probably the last entry) from the Stockdata list! -------
             */
             
-            ArrayList<PointCalculationResult> realdata = data.getResults();
+            List<PointCalculationResult> realdata = data.getResults();
             int count=0;
             while (count <realdata.size()-1 && !mdate.contentEquals(realdata.get(count).getDate()) ) {
                 count++;

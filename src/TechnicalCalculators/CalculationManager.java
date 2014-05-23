@@ -4,11 +4,13 @@
  */
 package TechnicalCalculators;
 
-import DataLoaders.SQLDBTools;
+import DataContainers.Quote;
+import DataLoaders.DynamoDBTools;
 import DataContainers.StockData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -21,18 +23,24 @@ public class CalculationManager {
     private StockData stockData;
     private HashMap<String,CalculationResult> resultList;
     private int cacheSize=20;
-    private final SQLDBTools dbConnection;
+    private final DynamoDBTools dbConnection;
     
     public CalculationManager() {
         super();
-        dbConnection = new SQLDBTools();
+        dbConnection = new DynamoDBTools();
         resultList = new HashMap();
         stockData = new StockData();
     }
     
     public void setStockname(String stock) {
         this.stockname = stock;
-        stockData = dbConnection.readStockfromDB(stock);
+        stockData.setCandles((List<Quote>)dbConnection.readStockfromDB(stock));
+        //stockData = YahooQuoteSource.fetchEOD(stock);
+    }
+    
+    public void setStockname(String stock, String startdate) {
+        this.stockname = stock;
+        stockData.setCandles(dbConnection.readStockfromDB(stock, startdate));
         //stockData = YahooQuoteSource.fetchEOD(stock);
     }
 /*
@@ -57,11 +65,11 @@ public class CalculationManager {
  *    A* || B*  
  *   
  */    
-    public CalculationResult parse(ArrayList<String> commandLine) {
+    public CalculationResult parse(List<String> commandLine) {
         Stack<CalculationResult> tests = new Stack<>();
         Stack<String> comparisonOp = new Stack<>();
         Stack<String> conjunctionOp = new Stack<>();
-        ArrayList<String> accumulator = new ArrayList<>();
+        List<String> accumulator = new ArrayList<>();
         
         for (String current : commandLine) {
             switch (current) {
@@ -174,7 +182,7 @@ public class CalculationManager {
         return returnMe;
     }
     
-    private CalculationResult evaluateAccumulator(ArrayList<String> accum) {
+    private CalculationResult evaluateAccumulator(List<String> accum) {
         String[] data = new String[accum.size()];
 
         for (int i = 0; i < data.length; i++) {
@@ -243,7 +251,7 @@ public class CalculationManager {
         return comparisonResult;        
     }
     
-    public String convertToString(ArrayList<String> input) {
+    public String convertToString(List<String> input) {
         StringBuilder builder = new StringBuilder();
         for (String s : input) {
             builder.append(s);
@@ -259,7 +267,7 @@ public class CalculationManager {
      *    - store results in a CalculationResult.
      *  - make sure it does not overload the cache
      */
-    private void runTest(ArrayList<String> testname) {
+    private void runTest(List<String> testname) {
         CalculationResult local = new CalculationResult();
         local.setDefinition(convertToString(testname));
 

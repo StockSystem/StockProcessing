@@ -6,11 +6,13 @@
 
 package TestApplications;
 
-import DataContainers.TechnicalResults;
-import DataLoaders.SQLDBTools;
+import DataContainers.PointCalculationResult;
+import DataLoaders.DynamoDBTools;
 import TechnicalCalculators.CalculationManager;
 import TechnicalCalculators.CalculationResult;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -18,57 +20,73 @@ import java.util.ArrayList;
  */
 public class TechnicalDataUpdater {
     //DB values
-    SQLDBTools dbConnection;
+    DynamoDBTools dbConnection;
+    CalculationManager calculator;
             
             
     public TechnicalDataUpdater() {
         super();
-        dbConnection = new SQLDBTools();
+        dbConnection = new DynamoDBTools();
+    }
+    
+    public void run(String stockname) {
+
+        ArrayList<String> testlist = new ArrayList<>();
+        testlist.add("sma_5");
+        testlist.add("sma_10");
+        testlist.add("sma_15");
+        testlist.add("rsi_7");
+
+        //create calculationManager 
+       calculator = new CalculationManager();
+       calculator.setStockname(stockname);
+       //TODO: change this to specify a time range?
+       String lastStockDate= dbConnection.getMostRecentEntryDate(stockname);
+        
+        //foreach test:
+       for (String test : testlist) {
+        //      check for latest date
+           String currentTest = stockname + "_" + test;
+           String lastTechDate=dbConnection.getMostRecentEntryDate(currentTest);
+           if (lastTechDate ==null) {
+               runTechUpdate(stockname, test, "1995-01-01");
+           } else
+           if (lastTechDate.compareTo(lastStockDate) < 0) {
+               runTechUpdate(stockname, test, lastTechDate);
+           }
+       }
+    }
+    
+    private void runTechUpdate(String stockname, String test, String startdate) {
+        //List<String> wordList = Arrays.asList(words); 
+        List<String> testList = Arrays.asList(test.split("_"));
+        CalculationResult cresults = calculator.parse(testList);
+        double[] result = cresults.getCalcResults();
+        String[] dates = calculator.getStockData().getDates();
+        
+        for (int i=0 ; i<result.length ; i++) {
+            DynamoDBTools.loadTechnicaltoDB(
+                    new PointCalculationResult(stockname+"_"+test, 
+                                                            dates[i],
+                                                            result[i]));
+         }
     }
     
     public void run() {
-        //load list of stocks to run
+        ArrayList<String> stocklist = new ArrayList<>();
+        stocklist.add("shld");
+        
+        for (String currentStock : stocklist) {
+            run(currentStock);
+        }
+    }
+    
+       public static  void main(String[] args) {
+        TechnicalDataUpdater sdu = new TechnicalDataUpdater();
+                 //load list of stocks to run
         ArrayList<String> stocklist = new ArrayList<>();
         stocklist.add("shld");
        // stocklist.add("rgr");
-        ArrayList<String> testlist = new ArrayList<>();
-        testlist.add("sma");
-        String[] standardParameters = {"40"};
-        
-        
-       CalculationManager calculator = new CalculationManager();
-       for (String stock : stocklist) {
-           calculator.setStockname(stock);
-           ArrayList<String> testString = new ArrayList();
-          for(String test : testlist) {
-           //run calculations and load to db
-              testString.add(test);
-              for (String current : standardParameters) {
-                  testString.add(current);
-                  String techtable=stock +"_" +test;
-                  CalculationResult myResult = calculator.parse(testString);
-                  System.out.println(myResult.getDefinition());
-                  double[] output = myResult.getCalcResults(0);
-                  String[] dates = calculator.getStockData().getDates();
-                  TechnicalResults techResults = new TechnicalResults(myResult.getDefinition());
-                  
-                  for (int i=0 ; i<output.length ; i++) {
-                      techResults.addResult(dates[i], output[i]);
-                  }
-                  dbConnection.loadTechDatatoDB(techtable,techResults);
-                  testString.remove(testString.size()-1);
-              }
-              testString.remove(testString.size()-1);
-              
-            //dbConnection.loadStocktoDB(stock);
-          }
-        }
-        
-        
-    }
-    
-    public static  void main(String[] args) {
-        TechnicalDataUpdater sdu = new TechnicalDataUpdater();
         sdu.run();
     }
     

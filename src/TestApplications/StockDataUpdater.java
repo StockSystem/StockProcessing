@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,9 +33,9 @@ public class StockDataUpdater {
         dbConnection = new DynamoDBTools();
     }
     
-    private static ArrayList<String> generateStockList() {
+    private static List<String> generateStockList() {
         
-        ArrayList<String> stocklist = new ArrayList<>();
+        List<String> stocklist = new ArrayList<>();
         stocklist.add("shld");
         stocklist.add("rgr");
         stocklist.add("acxm");
@@ -60,7 +61,7 @@ public class StockDataUpdater {
        return null;
     }
     
-    public void run(ArrayList<String> stocklist) {
+    public void run(List<String> stocklist) {
         //load list of stocks to run
 
         for (String stock : stocklist) {

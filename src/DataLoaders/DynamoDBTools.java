@@ -7,6 +7,7 @@
 
 package DataLoaders;
 
+import DataContainers.PointCalculationResult;
 import DataContainers.Quote;
 import DataContainers.StockData;
 import java.util.HashMap;
@@ -47,12 +48,13 @@ public class DynamoDBTools {
     String PASS = "1mpossibl#"; */
     
     static AmazonDynamoDBClient client;
-    static String stockTable = "stockTable";
+    static DynamoDBMapper mapper;
 
     public DynamoDBTools() {
         super();
         try {
             createClient();
+            mapper = new DynamoDBMapper(client);
         } catch (Exception ex) {
            // Logger.getLogger(DynamoDBTools.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("Client connection error " + ex);
@@ -67,63 +69,6 @@ public class DynamoDBTools {
         client.setRegion(Region.getRegion(Regions.US_WEST_2)); 
     }
 
-
-    
- /*   public StockData readStockfromDB(String stockname) {
-        StockData results = new StockData(stockname);
-
-         try {
-            //STEP 2: Register JDBC driver
-            Class.forName(JDBC_DRIVER).newInstance();
-
-            //STEP 3: Open a connection
-            System.out.println("Connecting to a selected database...");
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            System.out.println("Connected database successfully...");
-
-            //STEP 4: Execute a query
-            System.out.println("Creating statement...");
-            stmt = conn.createStatement();
-            
-            String fetchSql = "select * from " + stockname  + " order by date desc";
-            ResultSet rs = stmt.executeQuery(fetchSql);
-            while (rs.next()) {
-                Quote local = new Quote();
-                local.setDate(rs.getString("date"));
-                local.setOpen(rs.getDouble("open"));
-                local.setHigh(rs.getDouble("high"));
-                local.setLow(rs.getDouble("low"));
-                local.setClose(rs.getDouble("close"));
-                local.setVolume(rs.getInt("volume"));
-                local.setAdj_Close(rs.getDouble("adj_close"));    
-                results.addCandle(local);
-            }
-
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null) {
-                    conn.close();
-                }
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-        return results;
-    } */
     
     public void loadStocktoDB_lowlevel(StockData data) {
           
@@ -158,8 +103,6 @@ public class DynamoDBTools {
         if (data.getCandles().size() <1  || data==null) 
             { return;}
         
-        DynamoDBMapper mapper = new DynamoDBMapper(client);
-        
         try {
             for (Quote current : data.getCandles()) {
                 mapper.save(current);
@@ -169,12 +112,22 @@ public class DynamoDBTools {
         }
     }
     
-    public String getMostRecentEntryDate(String stockname) {
-        DynamoDBMapper mapper = new DynamoDBMapper(client);
+    public static void loadTechnicaltoDB(PointCalculationResult data) {
+        
+        try {
+            
+                mapper.save(data);
+            
+        } catch (AmazonServiceException ase) {
+            System.err.println("Failed to create Technical entry: " + data.getTestname());
+        }
+    }
+        
+    public String getMostRecentEntryDate(String indexname) {
         
         try {
             Quote replyKey = new Quote();
-            replyKey.setStockname(stockname);
+            replyKey.setStockname(indexname);
 
             DynamoDBQueryExpression<Quote> queryExpression = new DynamoDBQueryExpression<Quote>()
                     .withHashKeyValues(replyKey)
@@ -190,20 +143,22 @@ public class DynamoDBTools {
             return null;  
             
         } catch (AmazonServiceException ase) {
-            Logger.getLogger(DynamoDBTools.class.getName()).log(Level.SEVERE, "Failed to fetch item in " + stockname, ase);
+            Logger.getLogger(DynamoDBTools.class.getName()).log(Level.SEVERE, "Failed to fetch item in " + indexname, ase);
             return null;
         }
     }
         
-    public void readStockfromDB(String stockname) {
-
-        DynamoDBMapper mapper = new DynamoDBMapper(client);
+    public List<Quote> readStockfromDB (String stockname) {
+        return readStockfromDB(stockname, "1995-01-01");
+    }
+    
+    public List<Quote> readStockfromDB(String stockname, String startdate) {
         
         try {
             
          Condition rangeKeyCondition = new Condition()
             .withComparisonOperator(ComparisonOperator.GT.toString())
-            .withAttributeValueList(new AttributeValue().withS("2013-01-01"));
+            .withAttributeValueList(new AttributeValue().withS(startdate));
 
         Quote replyKey = new Quote();
         replyKey.setStockname(stockname);
@@ -215,13 +170,12 @@ public class DynamoDBTools {
             
             List<Quote> fullList = mapper.query(Quote.class, queryExpression);
             
-            for(Quote current : fullList) {
-                System.out.println(current.toString());
-            }
+            return fullList;
             
         } catch (AmazonServiceException ase) {
             Logger.getLogger(DynamoDBTools.class.getName()).log(Level.SEVERE, "Failed to fetch item in " + stockname, ase);
         }
+        return null;
     }
            
     public void loadStocktoDB(String stockname) {

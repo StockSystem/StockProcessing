@@ -4,8 +4,8 @@
  */
 package DataContainers;
 
-import DataContainers.Quote;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  */
 public class StockData {
     private String name;
-    private ArrayList<Quote> candles;
+    private List<Quote> candles;
     private boolean sorted = false;
     private Pattern datePattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}"); //yyyy-mm-dd
     
@@ -35,18 +35,22 @@ public class StockData {
         candles.add(lCandle);
     }
     
+    public void setCandles(List<Quote> inCandles) {
+        this.candles = (List<Quote>) inCandles;
+    }
+    
     public void sortCandlesByDate() {
         sorted= true;
     }
     
-    public ArrayList<Quote> getCandles() {
+    public List<Quote> getCandles() {
         if (!sorted) {
             sortCandlesByDate();
         }
         return candles;       
     }
     
-    public ArrayList<Quote> getCandlesInReverseOrder() {        
+    public List<Quote> getCandlesInReverseOrder() {        
         if (!sorted) {
             sortCandlesByDate();
         }

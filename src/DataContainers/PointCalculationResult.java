@@ -6,11 +6,18 @@
 
 package DataContainers;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+
 /**
  *
  * @author kpriddy
  */
+@DynamoDBTable(tableName="Technicals")
 public class PointCalculationResult {
+    String testname;
     String date;
     double value;
     
@@ -26,6 +33,23 @@ public class PointCalculationResult {
         this.value=value;
     }
 
+    public PointCalculationResult(String testname,String date, double value) {
+        super();
+        this.testname = testname;
+        this.date=date;
+        this.value=value;
+    }
+    
+     @DynamoDBHashKey(attributeName="testname")
+    public String getTestname() {
+        return testname;
+    }
+
+    public void setTestname(String testname) {
+        this.testname = testname;
+    }
+
+    @DynamoDBRangeKey(attributeName="date")
     public String getDate() {
         return date;
     }
@@ -34,6 +58,7 @@ public class PointCalculationResult {
         this.date = date;
     }
 
+    @DynamoDBAttribute(attributeName="value") 
     public double getValue() {
         return value;
     }

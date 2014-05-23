@@ -5,6 +5,7 @@
 package DataContainers;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -12,7 +13,7 @@ import java.util.ArrayList;
  */
 public class TechnicalResults {
     private String name;
-    private ArrayList<PointCalculationResult> results;
+    private List<PointCalculationResult> results;
     
     public TechnicalResults() {
         results = new ArrayList<>();
@@ -31,11 +32,11 @@ public class TechnicalResults {
         this.name = name;
     }
 
-    public ArrayList<PointCalculationResult> getResults() {
+    public List<PointCalculationResult> getResults() {
         return results;
     }
 
-    public void setResults(ArrayList<PointCalculationResult> results) {
+    public void setResults(List<PointCalculationResult> results) {
         this.results = results;
     }    
     
