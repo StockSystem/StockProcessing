@@ -80,7 +80,7 @@ public class YahooQuoteSource {
                 currentQuote = new Quote();
                 StringTokenizer str = new StringTokenizer(line, ",");
                 currentQuote.setStockname(stock);
-                currentQuote.setDate(str.nextToken());
+                currentQuote.setTextDate(str.nextToken());
                 // get data
                 currentQuote.setOpen(Double.parseDouble(str.nextToken()));
                 currentQuote.setHigh(Double.parseDouble(str.nextToken()));
@@ -105,7 +105,7 @@ public class YahooQuoteSource {
     public static void main(String [] args) {
         StockData test = null;
         try {
-            test=fetchEOD("yhoo","2015-07-15", "2015-07-24");
+            test=fetchEOD("yhoo","2010-01-01", "2015-01-01");
         } catch (Exception ex) {
             Logger.getLogger(YahooQuoteSource.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -64,7 +64,7 @@ public class StockData {
 
         if (datePattern.matcher(date).matches()) {
             for (Quote current : candles) {
-                if (current.getDate().matches(date)) {
+                if (current.getTextDate().matches(date)) {
                     return current;
                 }
             }
@@ -75,22 +75,17 @@ public class StockData {
         return null;
     }
     
-    public Quote getCandleByDate(int month, int day, int year) {
-        
-        for (Quote current : candles) {
-            if (current.getYear() == year) {
-                if (current.getMonth() == month) {
-                    if (current.getDay() == day) {
-                        return current;
-                    }
-                }
-            }
+    
+    public String[] getDates() {
+        String[] rOpens = new String[candles.size()];
+        for (int i=0 ; i<rOpens.length ; i++) {
+            rOpens[i] = candles.get(i).getTextDate();
         }
-        return null;
+        return rOpens;
     }
     
-    public String[]getDates() {
-        String[] rOpens = new String[candles.size()];
+    public double[] getDatesMillis() {
+        double[] rOpens = new double[candles.size()];
         for (int i=0 ; i<rOpens.length ; i++) {
             rOpens[i] = candles.get(i).getDate();
         }

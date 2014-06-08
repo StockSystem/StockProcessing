@@ -138,12 +138,12 @@ public class DynamoDBTools {
             List<Quote> fullList = mapper.queryPage(Quote.class, queryExpression).getResults();
 
             if (fullList.size() >0) {
-                return fullList.get(0).getDate();
+                return fullList.get(0).getTextDate();
             } 
             return null;  
             
         } catch (AmazonServiceException ase) {
-            Logger.getLogger(DynamoDBTools.class.getName()).log(Level.SEVERE, "Failed to fetch item in " + indexname, ase);
+            Logger.getLogger(DynamoDBTools.class.getName()).log(Level.SEVERE, "Failed to fetch item in " + indexname);
             return null;
         }
     }
@@ -152,20 +152,22 @@ public class DynamoDBTools {
         return readStockfromDB(stockname, "1995-01-01");
     }
     
-    public List<Quote> readStockfromDB(String stockname, String startdate) {
+    public List<Quote> readStockfromDB(String stockname, String indate) {
         
+        long startdate = java.sql.Date.valueOf(indate).getTime();
         try {
             
          Condition rangeKeyCondition = new Condition()
             .withComparisonOperator(ComparisonOperator.GT.toString())
-            .withAttributeValueList(new AttributeValue().withS(startdate));
+            .withAttributeValueList(new AttributeValue().withN(Long.toString(startdate)));
 
         Quote replyKey = new Quote();
         replyKey.setStockname(stockname);
         
         DynamoDBQueryExpression<Quote> queryExpression = new DynamoDBQueryExpression<Quote>()
             .withHashKeyValues(replyKey)
-            .withRangeKeyCondition("date", rangeKeyCondition);
+            .withRangeKeyCondition("date", rangeKeyCondition)
+            .withScanIndexForward(false);
 
             
             List<Quote> fullList = mapper.query(Quote.class, queryExpression);

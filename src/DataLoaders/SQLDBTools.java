@@ -66,7 +66,7 @@ public class SQLDBTools {
             ResultSet rs = stmt.executeQuery(fetchSql);
             while (rs.next()) {
                 Quote local = new Quote();
-                local.setDate(rs.getString("date"));
+                local.setTextDate(rs.getString("date"));
                 local.setOpen(rs.getDouble("open"));
                 local.setHigh(rs.getDouble("high"));
                 local.setLow(rs.getDouble("low"));
