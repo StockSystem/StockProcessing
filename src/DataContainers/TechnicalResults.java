@@ -40,7 +40,7 @@ public class TechnicalResults {
         this.results = results;
     }    
     
-    public void addResult(String date, double value) {
+    public void addResult(double date, double value) {
         results.add(new PointCalculationResult(date,value));
     }
 }

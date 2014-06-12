@@ -223,9 +223,10 @@ public class SQLDBTools {
             
             List<PointCalculationResult> realdata = data.getResults();
             int count=0;
-            while (count <realdata.size()-1 && !mdate.contentEquals(realdata.get(count).getDate()) ) {
+            //TODO: fix this date code if you ever use SQL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*            while (count <realdata.size()-1 && !mdate.contentEquals(realdata.get(count).getDate()) ) {
                 count++;
-            }
+            } */
             System.out.println("Match: " + realdata.get(count).getDate());
             // String sql = "SELECT * FROM hal";
             // "INSERT INTO $tableName (date, open, high, low, close, volume, adj_close)  VALUES ('$open', '$high', '$low', '$close', '$volume', '$adj_close')"

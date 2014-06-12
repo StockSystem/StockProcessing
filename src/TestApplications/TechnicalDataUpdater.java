@@ -62,7 +62,7 @@ public class TechnicalDataUpdater {
         List<String> testList = Arrays.asList(test.split("_"));
         CalculationResult cresults = calculator.parse(testList);
         double[] result = cresults.getCalcResults();
-        String[] dates = calculator.getStockData().getDates();
+        double[] dates = calculator.getStockData().getDatesMillis();
         
         for (int i=0 ; i<result.length ; i++) {
             DynamoDBTools.loadTechnicaltoDB(

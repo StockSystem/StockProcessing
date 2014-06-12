@@ -18,22 +18,22 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 @DynamoDBTable(tableName="Technicals")
 public class PointCalculationResult {
     String testname;
-    String date;
+    double date;
     double value;
     
     public PointCalculationResult() {
         super();
-        this.date="";
+        this.date=0;
         this.value=0;
     }
     
-    public PointCalculationResult(String date, double value) {
+    public PointCalculationResult(double date, double value) {
         super();
         this.date=date;
         this.value=value;
     }
 
-    public PointCalculationResult(String testname,String date, double value) {
+    public PointCalculationResult(String testname,double date, double value) {
         super();
         this.testname = testname;
         this.date=date;
@@ -50,11 +50,11 @@ public class PointCalculationResult {
     }
 
     @DynamoDBRangeKey(attributeName="date")
-    public String getDate() {
+    public double getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(double date) {
         this.date = date;
     }
 

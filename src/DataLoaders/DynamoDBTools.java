@@ -147,14 +147,17 @@ public class DynamoDBTools {
             return null;
         }
     }
-        
+     
     public List<Quote> readStockfromDB (String stockname) {
         return readStockfromDB(stockname, "1995-01-01");
     }
     
     public List<Quote> readStockfromDB(String stockname, String indate) {
+        return readStockfromDB(stockname,java.sql.Date.valueOf(indate).getTime());
+    }
+    
+    public List<Quote> readStockfromDB(String stockname, long startdate) {
         
-        long startdate = java.sql.Date.valueOf(indate).getTime();
         try {
             
          Condition rangeKeyCondition = new Condition()
@@ -176,6 +179,43 @@ public class DynamoDBTools {
             
         } catch (AmazonServiceException ase) {
             Logger.getLogger(DynamoDBTools.class.getName()).log(Level.SEVERE, "Failed to fetch item in " + stockname, ase);
+        }
+        return null;
+    }
+    
+    
+    public List<PointCalculationResult> readTechnicalfromDB (String stockname) {
+        return readTechnicalfromDB(stockname, "1995-01-01");
+    }
+    
+    public List<PointCalculationResult> readTechnicalfromDB (String stockname, String indate) {
+        return readTechnicalfromDB(stockname, java.sql.Date.valueOf(indate).getTime());
+    }
+    
+    public List<PointCalculationResult> readTechnicalfromDB(String testname, long startdate) {
+        
+        
+        try {
+            
+         Condition rangeKeyCondition = new Condition()
+            .withComparisonOperator(ComparisonOperator.GT.toString())
+            .withAttributeValueList(new AttributeValue().withN(Long.toString(startdate)));
+
+        PointCalculationResult replyKey = new PointCalculationResult();
+        replyKey.setTestname(testname);
+        
+        DynamoDBQueryExpression<PointCalculationResult> queryExpression = new DynamoDBQueryExpression<PointCalculationResult>()
+            .withHashKeyValues(replyKey)
+            .withRangeKeyCondition("date", rangeKeyCondition)
+            .withScanIndexForward(false);
+
+            
+            List<PointCalculationResult> fullList = mapper.query(PointCalculationResult.class, queryExpression);
+            
+            return fullList;
+            
+        } catch (AmazonServiceException ase) {
+            Logger.getLogger(DynamoDBTools.class.getName()).log(Level.SEVERE, "Failed to fetch item in " + testname, ase);
         }
         return null;
     }
