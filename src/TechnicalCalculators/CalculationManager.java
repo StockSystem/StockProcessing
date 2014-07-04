@@ -226,7 +226,10 @@ public class CalculationManager {
             return runComparisons(aListString);
         } else {
             //Check pseudoCache to see if it has already been run
-            if (resultList.get(testname) == null) {
+            //TODO: UNCOMMENT WHEN IN PRODUCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            
+            //if (resultList.get(testname) == null) {
+            if(true) {
                 //if not run the test and add it to the cache.
                 runTest(aListString);
             }
@@ -234,6 +237,7 @@ public class CalculationManager {
             // before this (it should not since it is single-threaded) then we will return the wrong
             // result!!!!
             return resultList.get(testname);
+            
         }
     }
     
