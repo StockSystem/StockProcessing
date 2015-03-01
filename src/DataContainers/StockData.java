@@ -84,8 +84,8 @@ public class StockData {
         return rOpens;
     }
     
-    public double[] getDatesMillis() {
-        double[] rOpens = new double[candles.size()];
+    public long[] getDatesMillis() {
+        long[] rOpens = new long[candles.size()];
         for (int i=0 ; i<rOpens.length ; i++) {
             rOpens[i] = candles.get(i).getDate();
         }

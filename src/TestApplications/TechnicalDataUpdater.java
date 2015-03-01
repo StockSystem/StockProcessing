@@ -11,9 +11,14 @@ import DataLoaders.DynamoDBTools;
 import TechnicalCalculators.CalculationManager;
 import TechnicalCalculators.CalculationResult;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -80,7 +85,8 @@ public class TechnicalDataUpdater {
        calculator = new CalculationManager();
        calculator.setStockname(stockname);
        //TODO: change this to specify a time range?
-       String lastStockDate= dbConnection.getMostRecentEntryDate(stockname);
+       String lastStockDate= dbConnection.getMostRecentStockEntryDate(stockname);
+       System.out.println("Last stock update: " + lastStockDate);
         
         //foreach test:
        for (String test : testlist) {
@@ -88,9 +94,11 @@ public class TechnicalDataUpdater {
            String currentTest = stockname + "_" + test;
            System.out.println(new Timestamp(System.currentTimeMillis()));
            System.out.println(" Running: " + currentTest);
-           String lastTechDate=dbConnection.getMostRecentEntryDate(currentTest);
-           if (lastTechDate ==null) {
-               runTechUpdate(stockname, test, "1995-01-01");
+           String lastTechDate=dbConnection.getMostRecentTechnicalEntryDate(currentTest);   //getMostRecentEntryDate(currentTest);
+                System.out.println("Last technical update for " + currentTest + " = "+ lastTechDate);
+           if (lastTechDate == null) {
+               System.out.println("Last update was Empty.  Assuming no entries and running a full update.");
+               runTechUpdate(stockname, test, "2010-01-01");
            } else
            if (lastTechDate.compareTo(lastStockDate) < 0) {
                runTechUpdate(stockname, test, lastTechDate);
@@ -103,9 +111,31 @@ public class TechnicalDataUpdater {
         List<String> testList = Arrays.asList(test.split("_"));
         CalculationResult cresults = calculator.parse(testList);
         double[] result = cresults.getCalcResults();
-        double[] dates = calculator.getStockData().getDatesMillis();
+        long[] dates = calculator.getStockData().getDatesMillis();
+        int stopIndex=0;
+           
+        //compare startdate to dates array and run add all entries from 0->startdate!
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        long lastEntryMilliseconds = 0;
+        try {
+            Date date;
+            date = sdf.parse(startdate);
+            lastEntryMilliseconds = date.getTime();
+        } catch (ParseException ex) {
+            Logger.getLogger(TechnicalDataUpdater.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
-        for (int i=0 ; i<result.length ; i++) {
+        for (int i=0 ; i<dates.length ; i++) {
+            if (dates[i]<lastEntryMilliseconds) {
+                System.out.println("Index: " + i + " date: " + dates[i] + " lastEntry: " + lastEntryMilliseconds);
+                stopIndex=i;
+                break;
+            }
+        }
+        
+        System.out.println(" Adding " + stopIndex + " entries");
+
+        for (int i=0 ; i<stopIndex ; i++ ) { 
             DynamoDBTools.loadTechnicaltoDB(
                     new PointCalculationResult(stockname+"_"+test, 
                                                             dates[i],
@@ -116,6 +146,8 @@ public class TechnicalDataUpdater {
     public void run() {
         ArrayList<String> stocklist = new ArrayList<>();
         stocklist.add("shld");
+        stocklist.add("rgr");
+        stocklist.add("acxm");
         
         for (String currentStock : stocklist) {
             run(currentStock);
@@ -124,10 +156,6 @@ public class TechnicalDataUpdater {
     
        public static  void main(String[] args) {
         TechnicalDataUpdater sdu = new TechnicalDataUpdater();
-                 //load list of stocks to run
-        ArrayList<String> stocklist = new ArrayList<>();
-        stocklist.add("shld");
-       // stocklist.add("rgr");
         sdu.run();
     }
     

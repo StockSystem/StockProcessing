@@ -123,7 +123,7 @@ public class DynamoDBTools {
         }
     }
         
-    public String getMostRecentEntryDate(String indexname) {
+    public String getMostRecentStockEntryDate(String indexname) {
         
         try {
             Quote replyKey = new Quote();
@@ -136,6 +136,31 @@ public class DynamoDBTools {
 
             //List<Quote> fullList = mapper.query(Quote.class, queryExpression);
             List<Quote> fullList = mapper.queryPage(Quote.class, queryExpression).getResults();
+
+            if (fullList.size() >0) {
+                return fullList.get(0).getTextDate();
+            } 
+            return null;  
+            
+        } catch (AmazonServiceException ase) {
+            Logger.getLogger(DynamoDBTools.class.getName()).log(Level.SEVERE, "Failed to fetch item in " + indexname);
+            return null;
+        }
+    }
+    
+        public String getMostRecentTechnicalEntryDate(String indexname) {
+        
+        try {
+            PointCalculationResult replyKey = new PointCalculationResult();
+            replyKey.setTestname(indexname);
+
+            DynamoDBQueryExpression<PointCalculationResult> queryExpression = new DynamoDBQueryExpression<PointCalculationResult>()
+                    .withHashKeyValues(replyKey)
+                    .withScanIndexForward(false)
+                    .withLimit(1);
+
+            //List<Quote> fullList = mapper.query(Quote.class, queryExpression);
+            List<PointCalculationResult> fullList = mapper.queryPage(PointCalculationResult.class, queryExpression).getResults();
 
             if (fullList.size() >0) {
                 return fullList.get(0).getTextDate();

@@ -66,7 +66,7 @@ public class StockDataUpdater {
 
         for (String stock : stocklist) {
             //get last date from database
-            String date = dbConnection.getMostRecentEntryDate(stock);
+            String date = dbConnection.getMostRecentStockEntryDate(stock);
             if (date == null) {
                 Logger.getLogger(StockDataUpdater.class.getName())
                         .log(Level.INFO, "Full Load of: " + stock);
