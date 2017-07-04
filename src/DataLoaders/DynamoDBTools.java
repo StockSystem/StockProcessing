@@ -43,9 +43,6 @@ public class DynamoDBTools {
   /*  String JDBC_DRIVER = "com.mysql.jdbc.Driver";
     String DB_URL = "jdbc:mysql://localhost/stockdata";
 
-    //  Database credentials
-    String USER = "kpriddy";
-    String PASS = "1mpossibl#"; */
     
     static AmazonDynamoDBClient client;
     static DynamoDBMapper mapper;
